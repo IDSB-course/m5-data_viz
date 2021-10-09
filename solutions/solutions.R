@@ -80,23 +80,36 @@ kiva_clean %>%
 #5
 
 
-plot_sector <- function(x){
+
+
+plot_bubbles <- function(x){
   ggplotly(
-    kiva_clean %>% 
-      filter(sector == x) %>% 
-      group_by(country, repayment_interval, activity) %>% 
-      summarise(tot_loan = sum(loan_amount, na.rm = T),
-                lender_mean = mean(lender_count, na.rm = T),
-                count = n()) %>% 
-      ggplot(aes(x = count, y = lender_mean, text = country))+
-      geom_point(aes(size = tot_loan, col = repayment_interval), alpha = .6)+
-      theme_bw()+
+    kiva_clean %>%
+      filter(sector == x) %>%
+      group_by(country, repayment_interval, activity) %>%
+      summarise(
+        tot_loan = sum(loan_amount, na.rm = T),
+        borrowers_f = sum(borrowers_f, na.rm = T),
+        borrowers_m = sum(borrowers_m, na.rm = T)
+      ) %>%
+      ggplot(aes(text = country)) +
+      geom_point(
+        aes(
+          x = borrowers_f,
+          y = borrowers_m,
+          size = tot_loan,
+          col = repayment_interval
+        ),
+        alpha = .6
+      ) +
+      scale_y_log10() +
       scale_x_log10()+
-      facet_wrap(~activity,scales = 'free_y'))
+      theme_bw()
+  )
 }
 
 
-plot_sector('Education')
+plot_bubbles('Agriculture')
 
 
 
